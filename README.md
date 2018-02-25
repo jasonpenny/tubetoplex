@@ -30,8 +30,8 @@ Update dependencies with `dep ensure`
 - [ ] Pull a page of posts from tumblr, extracting a link and tag
 - [ ] Sync posts to database
 
-- [ ] given a video url and tag, get info
-- [ ] given a video url and tag, download video
+- [X] given a video url and tag, get info
+- [X] given a video url and tag, download video
 - [ ] After downloading the video, rename to include a season and
   episode number
 - [ ] Create episode NFO file
