@@ -16,6 +16,14 @@ processed yet, download them, move them to a directory of a Custom TV Show,
 rename them to be picked up in a particular season, and create an NFO file with
 information about the "episode".
 
+## Development
+
+Dependency management is handled by [dep](https://github.com/golang/dep)
+
+Install on MacOS with `brew install dep`
+
+Update dependencies with `dep ensure`
+
 ### TODO
 
 - [ ] Setup database to store videos
