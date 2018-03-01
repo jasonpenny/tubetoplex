@@ -32,7 +32,7 @@ Update dependencies with `dep ensure`
 
 - [X] given a video url and tag, get info
 - [X] given a video url and tag, download video
-- [ ] After downloading the video, rename to include a season and
+- [X] After downloading the video, rename to include a season and
   episode number
 - [ ] Create episode NFO file
 

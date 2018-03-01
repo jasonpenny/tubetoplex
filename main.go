@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/BrianAllred/goydl"
 )
 
-func main() {
+func download_url(url string, season, episode int) {
 	tmp := os.TempDir()
 	fmt.Printf("Temp dir %s\n", tmp)
 
 	youtubeDl := goydl.NewYoutubeDl()
-	youtubeDl.Options.Output.Value = tmp + "%(title)s-%(id)s.%(ext)s"
-	cmd, err := youtubeDl.Download("https://www.youtube.com/watch?v=C0DPdy98e4c")
+	youtubeDl.Options.Output.Value = fmt.Sprintf("%sS%02dE%02d.%%(title)s-%%(id)s.%%(ext)s", tmp, season, episode)
+	cmd, err := youtubeDl.Download(url)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,8 +24,16 @@ func main() {
 	fmt.Printf("Description: %s\n", youtubeDl.Info.Description)
 	fmt.Printf("AverageRating: %f\n", youtubeDl.Info.AverageRating)
 	fmt.Printf("UploadDate: %s\n", youtubeDl.Info.UploadDate)
-	// can't trust this, doesn't get set by the lib and wrong extension with the fix
-	// fmt.Printf("Filename: %v\n", youtubeDl.Info.Filename)
 
 	cmd.Wait()
+
+	filepathglob := fmt.Sprintf("%sS%02dE%02d.%s-%s*", tmp, season, episode, youtubeDl.Info.Title, youtubeDl.Info.ID)
+	matches, err := filepath.Glob(filepathglob)
+	filename := matches[0]
+
+	fmt.Printf("%v", filename)
+}
+
+func main() {
+	download_url("https://www.youtube.com/watch?v=C0DPdy98e4c", 3, 2)
 }
