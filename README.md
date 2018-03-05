@@ -34,7 +34,7 @@ Update dependencies with `dep ensure`
 - [X] given a video url and tag, download video
 - [X] After downloading the video, rename to include a season and
   episode number
-- [ ] Create episode NFO file
+- [X] Create episode NFO file
 
 - [ ] Check for new posts on a schedule (like every hour), and sync to
   database
