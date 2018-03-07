@@ -27,7 +27,7 @@ Update dependencies with `dep ensure`
 ### TODO
 
 - [ ] Setup database to store videos
-- [ ] Pull a page of posts from tumblr, extracting a link and tag
+- [X] Pull a page of posts from tumblr, extracting a link and tag
 - [ ] Sync posts to database
 
 - [X] given a video url and tag, get info

@@ -7,9 +7,33 @@
   packages = ["."]
   revision = "015c9f2f47fc398605b489e39d9720338e7b356d"
 
+[[projects]]
+  name = "github.com/dghubble/oauth1"
+  packages = ["."]
+  revision = "70562a5920ad9b6ff03ef697c0f90ae569abbd2b"
+  version = "v0.4.0"
+
+[[projects]]
+  name = "github.com/tumblr/tumblr.go"
+  packages = ["."]
+  revision = "01c315a92daab3e8af9df49da1363cc60421fa70"
+  version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/tumblr/tumblrclient.go"
+  packages = ["."]
+  revision = "a17c0c6c5e1b7cf6a493cee47621034a11329358"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context"]
+  revision = "22ae77b79946ea320088417e4d50825671d82d57"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cab74243cf64c935c99ca2358b24f89c7fdebce598d98646e58026cdab84ef00"
+  inputs-digest = "d109428fb71b1c78e60e0252345bdff2dc91b65984c97653313ffa94aa682973"
   solver-name = "gps-cdcl"
   solver-version = 1
