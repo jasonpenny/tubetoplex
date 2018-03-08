@@ -14,6 +14,21 @@
   version = "v0.4.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/jmoiron/sqlx"
+  packages = [
+    ".",
+    "reflectx"
+  ]
+  revision = "cf35089a197953c69420c8d0cecda90809764b1d"
+
+[[projects]]
+  name = "github.com/mattn/go-sqlite3"
+  packages = ["."]
+  revision = "6c771bb9887719704b210e87e934f08be014bdb1"
+  version = "v1.6.0"
+
+[[projects]]
   name = "github.com/tumblr/tumblr.go"
   packages = ["."]
   revision = "01c315a92daab3e8af9df49da1363cc60421fa70"
@@ -34,6 +49,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d109428fb71b1c78e60e0252345bdff2dc91b65984c97653313ffa94aa682973"
+  inputs-digest = "5bae003939c4a5a3ac4715ff35a19f02a012b332f79d61cc1ccbb6f178839ac5"
   solver-name = "gps-cdcl"
   solver-version = 1
