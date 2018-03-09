@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -57,46 +59,71 @@ func main() {
 		os.Getenv("TUMBLR_TOKEN"),
 		os.Getenv("TUMBLR_TOKEN_SECRET"),
 	)
-	resp, err := tumblr.GetPosts(client, "softwaredevvideos", url.Values{})
-	if err != nil {
-		panic(err)
-	}
 
-	allPosts, err := resp.All()
-	if err != nil {
-		panic(err)
-	}
+	offset := 0
+	for {
+		params := url.Values{}
+		params.Set("limit", "10")
+		params.Set("offset", strconv.Itoa(offset))
+		offset += 10
 
-	stmt, err := db.PrepareNamed(`SELECT * FROM videos WHERE url = :url`)
-	for _, post := range allPosts {
-		video := &Video{}
-
-		switch pt := post.(type) {
-		case *tumblr.LinkPost:
-			fmt.Printf("link   %d %v %v\n", pt.Id, pt.Url, pt.Tags)
-			video.Url = pt.Url
-		case *tumblr.VideoPost:
-			fmt.Printf("video  %d %v %v\n", pt.Id, pt.PermalinkUrl, pt.Tags)
-			video.Url = pt.PermalinkUrl
-		default:
-			continue
-		}
-
-		videos := []Video{}
-		err = stmt.Select(&videos, video)
+		resp, err := tumblr.GetPosts(client, "softwaredevvideos", params)
 		if err != nil {
 			panic(err)
 		}
 
-		if len(videos) == 0 {
-			fmt.Println("  Inserting video")
-			_, err = db.NamedExec(
-				`INSERT INTO videos (url, show, filename, title, description, average_rating, upload_date)
-			VALUES (:url, :show, :filename, :title, :description, :average_rating, :upload_date)`,
-				&video,
-			)
+		allPosts, err := resp.All()
+		if err != nil {
+			panic(err)
+		}
+
+		if len(allPosts) == 0 {
+			break
+		}
+
+		stmt, err := db.PrepareNamed(`SELECT * FROM videos WHERE url = :url`)
+		for _, post := range allPosts {
+			video := &Video{}
+
+			switch pt := post.(type) {
+			case *tumblr.LinkPost:
+				fmt.Printf("link   %d %v %v\n", pt.Id, pt.Url, pt.Tags)
+				video.Url = pt.Url
+				for _, tag := range pt.Tags {
+					if tag != "unprocessed" {
+						video.Show = strings.ToLower(tag)
+						break
+					}
+				}
+			case *tumblr.VideoPost:
+				fmt.Printf("video  %d %v %v\n", pt.Id, pt.PermalinkUrl, pt.Tags)
+				video.Url = pt.PermalinkUrl
+				for _, tag := range pt.Tags {
+					if tag != "unprocessed" {
+						video.Show = strings.ToLower(tag)
+						break
+					}
+				}
+			default:
+				continue
+			}
+
+			videos := []Video{}
+			err = stmt.Select(&videos, video)
 			if err != nil {
 				panic(err)
+			}
+
+			if len(videos) == 0 {
+				fmt.Println("  Inserting video")
+				_, err = db.NamedExec(
+					`INSERT INTO videos (url, show, filename, title, description, average_rating, upload_date)
+			VALUES (:url, :show, :filename, :title, :description, :average_rating, :upload_date)`,
+					&video,
+				)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}
 	}
