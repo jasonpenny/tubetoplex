@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/url"
 	"os"
 	"strconv"
@@ -14,17 +13,10 @@ import (
 )
 
 func main() {
-	//vi := downloadURL("https://www.youtube.com/watch?v=C0DPdy98e4c", 3, 2)
-
-	//err := createNFOFile(vi)
-	//if err != nil {
-	//    panic(err)
-	//}
-
 	var db *sqlx.DB
 	var err error
 
-	db, err = sqlx.Connect("sqlite3", "__temp.db")
+	db, err = sqlx.Connect("sqlite3", "__videos.db")
 	if err != nil {
 		panic("Could not open sqlite file")
 	}
@@ -38,10 +30,15 @@ func main() {
 		title VARCHAR(255),
 		description TEXT,
 		average_rating NUMERIC,
-		upload_date VARCHAR(8)
+		upload_date VARCHAR(8),
+		step VARCHAR
 	);
 	`)
 
+	pullNewPosts(db)
+}
+
+func pullNewPosts(db *sqlx.DB) {
 	type Video struct {
 		Id            int     `db:"id"`
 		Url           string  `db:"url"`
@@ -51,6 +48,7 @@ func main() {
 		Description   string  `db:"description"`
 		AverageRating float64 `db:"average_rating"`
 		UploadDate    string  `db:"upload_date"`
+		Step          string  `db:"step"`
 	}
 
 	client := tumblr_go.NewClientWithToken(
@@ -87,7 +85,6 @@ func main() {
 
 			switch pt := post.(type) {
 			case *tumblr.LinkPost:
-				fmt.Printf("link   %d %v %v\n", pt.Id, pt.Url, pt.Tags)
 				video.Url = pt.Url
 				for _, tag := range pt.Tags {
 					if tag != "unprocessed" {
@@ -96,12 +93,19 @@ func main() {
 					}
 				}
 			case *tumblr.VideoPost:
-				fmt.Printf("video  %d %v %v\n", pt.Id, pt.PermalinkUrl, pt.Tags)
 				video.Url = pt.PermalinkUrl
 				for _, tag := range pt.Tags {
 					if tag != "unprocessed" {
 						video.Show = strings.ToLower(tag)
 						break
+					}
+				}
+				if video.Url == "" {
+					// fallback to parsing out of source_url
+					if u, err := url.Parse(pt.SourceUrl); err == nil {
+						if m, err := url.ParseQuery(u.RawQuery); err == nil {
+							video.Url = m["z"][0]
+						}
 					}
 				}
 			default:
@@ -114,16 +118,20 @@ func main() {
 				panic(err)
 			}
 
-			if len(videos) == 0 {
-				fmt.Println("  Inserting video")
-				_, err = db.NamedExec(
-					`INSERT INTO videos (url, show, filename, title, description, average_rating, upload_date)
-			VALUES (:url, :show, :filename, :title, :description, :average_rating, :upload_date)`,
-					&video,
-				)
-				if err != nil {
-					panic(err)
-				}
+			if len(videos) > 0 {
+				// this video has already been stored, stop paging through posts
+				break
+			}
+
+			video.Step = "new"
+
+			_, err = db.NamedExec(
+				`INSERT INTO videos (url, show, filename, title, description, average_rating, upload_date, step)
+					VALUES (:url, :show, :filename, :title, :description, :average_rating, :upload_date, :step)`,
+				&video,
+			)
+			if err != nil {
+				panic(err)
 			}
 		}
 	}
