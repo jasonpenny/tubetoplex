@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jasonpenny/tubetoplex/internal/videostorage"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	tumblr "github.com/tumblr/tumblr.go"
@@ -22,31 +23,7 @@ func main() {
 		panic("Could not open sqlite file")
 	}
 
-	db.MustExec(`
-	CREATE TABLE IF NOT EXISTS videos (
-		id INTEGER PRIMARY KEY,
-		url TEXT,
-		show VARCHAR(255),
-		filename TEXT,
-		title VARCHAR(255),
-		description TEXT,
-		average_rating NUMERIC,
-		upload_date VARCHAR(8),
-		step VARCHAR
-	);
-	`)
-
-	type Video struct {
-		Id            int     `db:"id"`
-		Url           string  `db:"url"`
-		Show          string  `db:"show"`
-		Filename      string  `db:"filename"`
-		Title         string  `db:"title"`
-		Description   string  `db:"description"`
-		AverageRating float64 `db:"average_rating"`
-		UploadDate    string  `db:"upload_date"`
-		Step          string  `db:"step"`
-	}
+	videostorage.SetupTable(db)
 
 	client := tumblr_go.NewClientWithToken(
 		os.Getenv("TUMBLR_CONSUMER_KEY"),
@@ -76,9 +53,12 @@ func main() {
 			break
 		}
 
-		stmt, err := db.PrepareNamed(`SELECT * FROM videos WHERE url = :url`)
+		stmt, err := videostorage.PrepareLookupByURL(db)
+		if err != nil {
+			panic(err)
+		}
 		for _, post := range allPosts {
-			video := &Video{}
+			video := &videostorage.Video{}
 
 			should_store := true
 			switch pt := post.(type) {
@@ -128,21 +108,14 @@ func main() {
 				continue
 			}
 
-			videos := []Video{}
-			err = stmt.Select(&videos, video)
+			videos, err := videostorage.Find(stmt, video)
 			if err != nil {
 				panic(err)
 			}
 
 			if len(videos) == 0 {
-				video.Step = "downloaded"
-
 				fmt.Println("  Inserting video")
-				_, err = db.NamedExec(
-					`INSERT INTO videos (url, show, filename, title, description, average_rating, upload_date, step)
-					VALUES (:url, :show, :filename, :title, :description, :average_rating, :upload_date, :step)`,
-					&video,
-				)
+				_, err = videostorage.Add(db, video, "downloaded")
 				if err != nil {
 					panic(err)
 				}

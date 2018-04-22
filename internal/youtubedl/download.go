@@ -1,15 +1,16 @@
-package main
+package youtubedl
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 
 	"github.com/BrianAllred/goydl"
 )
 
-type videoInfo struct {
+type VideoInfo struct {
 	Season      int
 	Episode     int
 	Title       string
@@ -19,20 +20,28 @@ type videoInfo struct {
 	Filename    string
 }
 
-func downloadURL(url string, season, episode int) *videoInfo {
-	tmp := os.TempDir()
+func DownloadURL(url string, season, episode int) *VideoInfo {
+	dir := randomDir()
 
 	youtubeDl := goydl.NewYoutubeDl()
-	youtubeDl.Options.Output.Value = fmt.Sprintf(
-		"%sS%02dE%02d.%%(title)s-%%(id)s.%%(ext)s",
-		tmp, season, episode,
+	youtubeDl.Options.Output.Value = filepath.Join(
+		dir,
+		fmt.Sprintf(
+			"S%02dE%02d.%%(title)s-%%(id)s.%%(ext)s",
+			season, episode,
+		),
 	)
+
 	cmd, err := youtubeDl.Download(url)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	result := &videoInfo{
+	// without this, the 2nd time it runs it stalls
+	go io.Copy(ioutil.Discard, youtubeDl.Stdout)
+	go io.Copy(ioutil.Discard, youtubeDl.Stderr)
+
+	result := &VideoInfo{
 		Season:      season,
 		Episode:     episode,
 		Title:       youtubeDl.Info.Title,
@@ -45,10 +54,14 @@ func downloadURL(url string, season, episode int) *videoInfo {
 		log.Fatal(err)
 	}
 
-	filepathglob := fmt.Sprintf(
-		"%sS%02dE%02d.%s-%s*",
-		tmp, season, episode, youtubeDl.Info.Title, youtubeDl.Info.ID,
+	filepathglob := filepath.Join(
+		dir,
+		fmt.Sprintf(
+			"S%02dE%02d.*",
+			season, episode,
+		),
 	)
+
 	matches, err := filepath.Glob(filepathglob)
 
 	result.Filename = matches[0]

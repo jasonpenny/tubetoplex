@@ -1,11 +1,18 @@
 package main
 
 import (
+	"log"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
+	"github.com/jasonpenny/tubetoplex/internal/filecopier"
+	"github.com/jasonpenny/tubetoplex/internal/plexshowupdater"
+	"github.com/jasonpenny/tubetoplex/internal/showstorage"
+	"github.com/jasonpenny/tubetoplex/internal/videostorage"
+	"github.com/jasonpenny/tubetoplex/internal/youtubedl"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	tumblr "github.com/tumblr/tumblr.go"
@@ -21,35 +28,17 @@ func main() {
 		panic("Could not open sqlite file")
 	}
 
-	db.MustExec(`
-	CREATE TABLE IF NOT EXISTS videos (
-		id INTEGER PRIMARY KEY,
-		url TEXT,
-		show VARCHAR(255),
-		filename TEXT,
-		title VARCHAR(255),
-		description TEXT,
-		average_rating NUMERIC,
-		upload_date VARCHAR(8),
-		step VARCHAR
-	);
-	`)
+	videostorage.SetupTable(db)
+	showstorage.SetupTable(db)
 
 	pullNewPosts(db)
+	applyShowNumbersToNewPosts(db)
+	downloadNumberedVideos(db)
+	createNFOs(db)
+	copyFiles(db)
 }
 
 func pullNewPosts(db *sqlx.DB) {
-	type Video struct {
-		Id            int     `db:"id"`
-		Url           string  `db:"url"`
-		Show          string  `db:"show"`
-		Filename      string  `db:"filename"`
-		Title         string  `db:"title"`
-		Description   string  `db:"description"`
-		AverageRating float64 `db:"average_rating"`
-		UploadDate    string  `db:"upload_date"`
-		Step          string  `db:"step"`
-	}
 
 	client := tumblr_go.NewClientWithToken(
 		os.Getenv("TUMBLR_CONSUMER_KEY"),
@@ -79,9 +68,12 @@ func pullNewPosts(db *sqlx.DB) {
 			break
 		}
 
-		stmt, err := db.PrepareNamed(`SELECT * FROM videos WHERE url = :url`)
+		stmt, err := videostorage.PrepareLookupByURL(db)
+		if err != nil {
+			panic(err)
+		}
 		for _, post := range allPosts {
-			video := &Video{}
+			video := &videostorage.Video{}
 
 			switch pt := post.(type) {
 			case *tumblr.LinkPost:
@@ -112,8 +104,7 @@ func pullNewPosts(db *sqlx.DB) {
 				continue
 			}
 
-			videos := []Video{}
-			err = stmt.Select(&videos, video)
+			videos, err := videostorage.Find(stmt, video)
 			if err != nil {
 				panic(err)
 			}
@@ -123,16 +114,110 @@ func pullNewPosts(db *sqlx.DB) {
 				break
 			}
 
-			video.Step = "new"
-
-			_, err = db.NamedExec(
-				`INSERT INTO videos (url, show, filename, title, description, average_rating, upload_date, step)
-					VALUES (:url, :show, :filename, :title, :description, :average_rating, :upload_date, :step)`,
-				&video,
-			)
+			_, err = videostorage.Add(db, video, "new")
 			if err != nil {
 				panic(err)
 			}
 		}
+	}
+}
+
+func applyShowNumbersToNewPosts(db *sqlx.DB) {
+	videos, err := videostorage.FindForStep(db, "new")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, video := range videos {
+		show, err := showstorage.Find(db, video.Show)
+		if err != nil {
+			log.Printf("%+v\n", err)
+			continue
+		}
+
+		show.NextEpisode++
+		showstorage.Update(db, show)
+
+		video.SeasonNum = show.LatestSeason
+		video.EpisodeNum = show.NextEpisode
+		videostorage.Update(db, &video, "numbered")
+	}
+}
+
+func downloadNumberedVideos(db *sqlx.DB) {
+	videos, err := videostorage.FindForStep(db, "numbered")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, video := range videos {
+		vi := youtubedl.DownloadURL(video.Url, video.SeasonNum, video.EpisodeNum)
+
+		// store more details
+		video.Filename = vi.Filename
+		video.Title = vi.Title
+		video.Description = vi.Description
+		video.AverageRating = vi.Rating
+		video.UploadDate = vi.UploadDate
+
+		// transition to downloaded
+		videostorage.Update(db, &video, "downloaded")
+	}
+}
+
+func createNFOs(db *sqlx.DB) {
+	videos, err := videostorage.FindForStep(db, "downloaded")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, video := range videos {
+		plexshowupdater.CreateNFOFile(
+			video.Title,
+			video.SeasonNum,
+			video.EpisodeNum,
+			video.Description,
+			video.AverageRating,
+			video.UploadDate,
+			video.Filename,
+		)
+
+		videostorage.Update(db, &video, "nfoed")
+	}
+}
+
+func copyFiles(db *sqlx.DB) {
+	videos, err := videostorage.FindForStep(db, "nfoed")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, video := range videos {
+		show, err := showstorage.Find(db, video.Show)
+		if err != nil {
+			log.Printf("%+v\n", err)
+			continue
+		}
+
+		nfoFile := plexshowupdater.NFOFilenameForVideo(video.Filename)
+
+		filecopier.CopyFile(
+			nfoFile,
+			filepath.Join(
+				show.Path,
+				filepath.Base(nfoFile),
+			),
+		)
+
+		// copy file
+		filecopier.CopyFile(
+			video.Filename,
+			filepath.Join(
+				show.Path,
+				filepath.Base(video.Filename),
+			),
+		)
+
+		videostorage.Update(db, &video, "copied")
 	}
 }
