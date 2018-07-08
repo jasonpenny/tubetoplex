@@ -234,5 +234,10 @@ func copyFiles(db *sqlx.DB) {
 
 		videostorage.Update(db, &video, "copied")
 		log.Printf("COPY_FILES: Finished copying video %s\n", video.Url)
+
+		downloadDir := filepath.Dir(video.Filename)
+		if err := os.RemoveAll(downloadDir); err != nil {
+			log.Printf("COPY_FILES: Error, could not delete video dir: %v\n", err)
+		}
 	}
 }
