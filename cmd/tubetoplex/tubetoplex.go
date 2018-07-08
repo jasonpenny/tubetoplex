@@ -215,7 +215,7 @@ func copyFiles(db *sqlx.DB) {
 
 		nfoFile := plexshowupdater.NFOFilenameForVideo(video.Filename)
 
-		filecopier.CopyFile(
+		err = filecopier.CopyFile(
 			nfoFile,
 			filepath.Join(
 				show.Path,
@@ -223,14 +223,20 @@ func copyFiles(db *sqlx.DB) {
 			),
 		)
 
-		// copy file
-		filecopier.CopyFile(
-			video.Filename,
-			filepath.Join(
-				show.Path,
-				filepath.Base(video.Filename),
-			),
-		)
+		if err == nil {
+			err = filecopier.CopyFile(
+				video.Filename,
+				filepath.Join(
+					show.Path,
+					filepath.Base(video.Filename),
+				),
+			)
+		}
+
+		if err != nil {
+			log.Printf("COPY_FILES: Error, could not copy files %v\n", err)
+			continue
+		}
 
 		videostorage.Update(db, &video, "copied")
 		log.Printf("COPY_FILES: Finished copying video %s\n", video.Url)
