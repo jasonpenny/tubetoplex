@@ -39,10 +39,10 @@ func main() {
 }
 
 func pullNewPosts(db *sqlx.DB) {
-	consumer_key := os.Getenv("TUMBLR_CONSUMER_KEY")
-	consumer_secret := os.Getenv("TUMBLR_CONSUMER_SECRET")
+	consumerKey := os.Getenv("TUMBLR_CONSUMER_KEY")
+	consumerSecret := os.Getenv("TUMBLR_CONSUMER_SECRET")
 	token := os.Getenv("TUMBLR_TOKEN")
-	token_secret := os.Getenv("TUMBLR_TOKEN_SECRET")
+	tokenSecret := os.Getenv("TUMBLR_TOKEN_SECRET")
 
 	offset := 0
 	for {
@@ -52,7 +52,7 @@ func pullNewPosts(db *sqlx.DB) {
 			params.Set("offset", strconv.Itoa(offset))
 		}
 
-		client := tumblr_go.NewClientWithToken(consumer_key, consumer_secret, token, token_secret)
+		client := tumblr_go.NewClientWithToken(consumerKey, consumerSecret, token, tokenSecret)
 
 		resp, err := tumblr.GetPosts(client, "softwaredevvideos", params)
 		if err != nil {
@@ -81,7 +81,7 @@ func pullNewPosts(db *sqlx.DB) {
 
 			switch pt := post.(type) {
 			case *tumblr.LinkPost:
-				video.Url = pt.Url
+				video.URL = pt.Url
 				for _, tag := range pt.Tags {
 					if tag != "unprocessed" {
 						video.Show = strings.ToLower(tag)
@@ -89,18 +89,18 @@ func pullNewPosts(db *sqlx.DB) {
 					}
 				}
 			case *tumblr.VideoPost:
-				video.Url = pt.PermalinkUrl
+				video.URL = pt.PermalinkUrl
 				for _, tag := range pt.Tags {
 					if tag != "unprocessed" {
 						video.Show = strings.ToLower(tag)
 						break
 					}
 				}
-				if video.Url == "" {
+				if video.URL == "" {
 					// fallback to parsing out of source_url
 					if u, err := url.Parse(pt.SourceUrl); err == nil {
 						if m, err := url.ParseQuery(u.RawQuery); err == nil {
-							video.Url = m["z"][0]
+							video.URL = m["z"][0]
 						}
 					}
 				}
@@ -123,7 +123,7 @@ func pullNewPosts(db *sqlx.DB) {
 				panic(err)
 			}
 			pageHadNoNewVideos = false
-			log.Printf("PULL: Added video %s\n", video.Url)
+			log.Printf("PULL: Added video %s\n", video.URL)
 		}
 
 		if pageHadNoNewVideos {
@@ -147,12 +147,19 @@ func applyShowNumbersToNewPosts(db *sqlx.DB) {
 		}
 
 		show.NextEpisode++
-		showstorage.Update(db, show)
+		if _, err := showstorage.Update(db, show); err != nil {
+			log.Printf("NUMBERED: failed to update [show] %v\n", err)
+			continue
+		}
 
 		video.SeasonNum = show.LatestSeason
 		video.EpisodeNum = show.NextEpisode
-		videostorage.Update(db, &video, "numbered")
-		log.Printf("NUMBERED: updated video %s", video.Url)
+		if _, err := videostorage.Update(db, &video, "numbered"); err != nil {
+			log.Printf("NUMBERED: failed to update [video] %v\n", err)
+			continue
+		}
+
+		log.Printf("NUMBERED: updated video %s", video.URL)
 	}
 }
 
@@ -163,8 +170,8 @@ func downloadNumberedVideos(db *sqlx.DB) {
 	}
 
 	for _, video := range videos {
-		log.Printf("DOWNLOAD: Started downloading video %s", video.Url)
-		vi := youtubedl.DownloadURL(video.Url, video.SeasonNum, video.EpisodeNum)
+		log.Printf("DOWNLOAD: Started downloading video %s", video.URL)
+		vi := youtubedl.DownloadURL(video.URL, video.SeasonNum, video.EpisodeNum)
 
 		// store more details
 		video.Filename = vi.Filename
@@ -174,8 +181,12 @@ func downloadNumberedVideos(db *sqlx.DB) {
 		video.UploadDate = vi.UploadDate
 
 		// transition to downloaded
-		videostorage.Update(db, &video, "downloaded")
-		log.Printf("DOWNLOAD: Finished downloading video %s", video.Url)
+		if _, err := videostorage.Update(db, &video, "downloaded"); err != nil {
+			log.Printf("DOWNLOAD: download failed %v\n", err)
+			continue
+		}
+
+		log.Printf("DOWNLOAD: Finished downloading video %s", video.URL)
 	}
 }
 
@@ -186,7 +197,7 @@ func createNFOs(db *sqlx.DB) {
 	}
 
 	for _, video := range videos {
-		plexshowupdater.CreateNFOFile(
+		err = plexshowupdater.CreateNFOFile(
 			video.Title,
 			video.SeasonNum,
 			video.EpisodeNum,
@@ -195,8 +206,14 @@ func createNFOs(db *sqlx.DB) {
 			video.UploadDate,
 			video.Filename,
 		)
+		if err != nil {
+			log.Printf("NFOED: Unable to create NFO file %v\n", err)
+			continue
+		}
 
-		videostorage.Update(db, &video, "nfoed")
+		if _, err = videostorage.Update(db, &video, "nfoed"); err != nil {
+			log.Printf("NFOED: Unable to update [video] %v\n", err)
+		}
 	}
 }
 
@@ -238,8 +255,12 @@ func copyFiles(db *sqlx.DB) {
 			continue
 		}
 
-		videostorage.Update(db, &video, "copied")
-		log.Printf("COPY_FILES: Finished copying video %s\n", video.Url)
+		if _, err := videostorage.Update(db, &video, "copied"); err != nil {
+			log.Printf("COPY_FILES: Unable to update [video] %v\n", err)
+			continue
+		}
+
+		log.Printf("COPY_FILES: Finished copying video %s\n", video.URL)
 
 		downloadDir := filepath.Dir(video.Filename)
 		if err := os.RemoveAll(downloadDir); err != nil {

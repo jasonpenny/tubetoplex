@@ -34,7 +34,7 @@ func main() {
 
 	video := &videostorage.Video{
 		Show: show.Name,
-		Url:  os.Args[2],
+		URL:  os.Args[2],
 	}
 
 	stmt, err := videostorage.PrepareLookupByURL(db)

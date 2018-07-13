@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// CopyFile copies a file from src to dst.
 func CopyFile(src, dst string) (err error) {
 	in, err := os.Open(src)
 	if err != nil {

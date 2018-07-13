@@ -57,53 +57,55 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
+		const unprocessed = "unprocessed"
 		for _, post := range allPosts {
 			video := &videostorage.Video{}
 
-			should_store := true
+			shouldStore := true
 			switch pt := post.(type) {
 			case *tumblr.LinkPost:
 				fmt.Printf("link   %d %v %v\n", pt.Id, pt.Url, pt.Tags)
-				video.Url = pt.Url
+				video.URL = pt.Url
 				for _, tag := range pt.Tags {
-					if tag != "unprocessed" {
+					if tag != unprocessed {
 						video.Show = strings.ToLower(tag)
 					}
-					if tag == "unprocessed" {
-						should_store = false
+					if tag == unprocessed {
+						shouldStore = false
 					}
 				}
-				if video.Url == "" {
+				if video.URL == "" {
 					fmt.Printf("%v\n", pt)
 				}
 			case *tumblr.VideoPost:
 				fmt.Printf("video  %d %v %v\n", pt.Id, pt.PermalinkUrl, pt.Tags)
-				video.Url = pt.PermalinkUrl
+				video.URL = pt.PermalinkUrl
 				for _, tag := range pt.Tags {
-					if tag != "unprocessed" {
+					if tag != unprocessed {
 						video.Show = strings.ToLower(tag)
 					}
-					if tag == "unprocessed" {
-						should_store = false
+					if tag == unprocessed {
+						shouldStore = false
 					}
 				}
-				if video.Url == "" {
+				if video.URL == "" {
 					// fallback to parsing out of source_url
 					if u, err := url.Parse(pt.SourceUrl); err == nil {
 						if m, err := url.ParseQuery(u.RawQuery); err == nil {
-							video.Url = m["z"][0]
+							video.URL = m["z"][0]
 						}
 					}
 				}
 
-				if video.Url == "" {
+				if video.URL == "" {
 					fmt.Printf("%v\n", pt)
 				}
 			default:
 				continue
 			}
 
-			if !should_store || (video.Url == "") {
+			if !shouldStore || (video.URL == "") {
 				fmt.Printf("  Skipping\n")
 				continue
 			}

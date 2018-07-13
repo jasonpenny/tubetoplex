@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -39,7 +40,7 @@ func main() {
 	inputFilename := filepath.Base(os.Args[2])
 	video := &videostorage.Video{
 		Show:  show.Name,
-		Url:   inputFilename,
+		URL:   inputFilename,
 		Title: inputFilename[:strings.LastIndex(inputFilename, ".")],
 	}
 
@@ -59,12 +60,18 @@ func main() {
 
 		// reload video to get the id
 		videos, err = videostorage.Find(stmt, video)
+		if err != nil {
+			panic(err)
+		}
 		video = &videos[0]
 	}
 
 	// number the video
 	show.NextEpisode++
-	showstorage.Update(db, show)
+	if _, err := showstorage.Update(db, show); err != nil {
+		log.Printf("Show could not be updated %v\n", err)
+		os.Exit(3)
+	}
 
 	video.SeasonNum = show.LatestSeason
 	video.EpisodeNum = show.NextEpisode
@@ -83,17 +90,28 @@ func main() {
 	)
 
 	// copy the file to the dir with the season and episode number
-	filecopier.CopyFile(os.Args[2], video.Filename)
+	if err := filecopier.CopyFile(os.Args[2], video.Filename); err != nil {
+		log.Printf("Failed to copy video file %v\n", err)
+		os.Exit(5)
+	}
 
 	// mark as downloaded, further steps will be handled by tubetoplex
-	videostorage.Update(db, video, "downloaded")
+	if _, err := videostorage.Update(db, video, "downloaded"); err != nil {
+		log.Printf("Failed to update [video] %v\n", err)
+		os.Exit(6)
+	}
 }
 
 func randomDir() string {
 	b := make([]byte, 16)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		panic("Could not read 16 random bytes")
+	}
 
 	path := filepath.Join(".", "download", fmt.Sprintf("%X", b))
-	os.MkdirAll(path, os.ModePerm)
+	if err := os.MkdirAll(path, os.ModePerm); err != nil {
+		panic("Could not create download directory")
+	}
+
 	return path
 }

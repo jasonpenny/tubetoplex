@@ -6,9 +6,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// Video represents a video file and metadata.
 type Video struct {
-	Id            int     `db:"id"`
-	Url           string  `db:"url"`
+	ID            int     `db:"id"`
+	URL           string  `db:"url"`
 	Show          string  `db:"show"`
 	Filename      string  `db:"filename"`
 	Title         string  `db:"title"`
@@ -20,6 +21,7 @@ type Video struct {
 	Step          string  `db:"step"`
 }
 
+// SetupTable creates the shows table if it does not exist.
 func SetupTable(db *sqlx.DB) {
 	db.MustExec(`
 	CREATE TABLE IF NOT EXISTS videos (
@@ -38,6 +40,7 @@ func SetupTable(db *sqlx.DB) {
 	`)
 }
 
+// Add puts a new video into the database.
 func Add(db *sqlx.DB, video *Video, step string) (sql.Result, error) {
 	video.Step = step
 
@@ -56,6 +59,7 @@ func Add(db *sqlx.DB, video *Video, step string) (sql.Result, error) {
 	)
 }
 
+// Update stores new data in the database.
 func Update(db *sqlx.DB, video *Video, step string) (sql.Result, error) {
 	video.Step = step
 
@@ -78,16 +82,19 @@ func Update(db *sqlx.DB, video *Video, step string) (sql.Result, error) {
 	)
 }
 
+// PrepareLookupByURL returns a reusable statement for looking up a video by url.
 func PrepareLookupByURL(db *sqlx.DB) (*sqlx.NamedStmt, error) {
 	return db.PrepareNamed(`SELECT * FROM videos WHERE url = :url`)
 }
 
+// Find looks up a video by url.
 func Find(stmt *sqlx.NamedStmt, video *Video) ([]Video, error) {
 	result := []Video{}
 	err := stmt.Select(&result, video)
 	return result, err
 }
 
+// FindForStep returns all videos for the step.
 func FindForStep(db *sqlx.DB, step string) ([]Video, error) {
 	videos := []Video{}
 	stmt, err := db.Preparex(`SELECT * FROM videos WHERE step = ? ORDER BY id`)

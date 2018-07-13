@@ -10,6 +10,7 @@ import (
 	"github.com/BrianAllred/goydl"
 )
 
+// VideoInfo represents a video file and its youtube-dl metadata.
 type VideoInfo struct {
 	Season      int
 	Episode     int
@@ -20,6 +21,8 @@ type VideoInfo struct {
 	Filename    string
 }
 
+// DownloadURL will use youtube-dl to download a video and store it with the
+// filename with the prefix "S{season}E{episode}.{youtube-dl filaname}.
 func DownloadURL(url string, season, episode int) *VideoInfo {
 	dir := randomDir()
 
@@ -63,6 +66,9 @@ func DownloadURL(url string, season, episode int) *VideoInfo {
 	)
 
 	matches, err := filepath.Glob(filepathglob)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	result.Filename = matches[0]
 
