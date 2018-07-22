@@ -34,20 +34,3 @@ Run in interactive mode to see logs as they happen.
 `--privileged` is used to allow mounting a windows shared folder from
 the network on a windows host.
 `docker run --rm --privileged -it tubetoplex`
-
-### TODO
-
-- [X] Setup database to store videos
-- [X] Pull a page of posts from tumblr, extracting a link and tag
-- [X] Sync posts to database
-
-- [X] given a video url and tag, get info
-- [X] given a video url and tag, download video
-- [X] After downloading the video, rename to include a season and
-  episode number
-- [X] Create episode NFO file
-
-- [ ] Check for new posts on a schedule (like every hour), and sync to
-  database
-- [ ] Check database for new videos on a schedule, kick off download
-  task

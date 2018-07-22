@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jasonpenny/tubetoplex/internal/filecopier"
 	"github.com/jasonpenny/tubetoplex/internal/plexshowupdater"
@@ -20,6 +21,15 @@ import (
 )
 
 func main() {
+	run()
+	for _ = range time.NewTicker(time.Hour).C {
+		run()
+	}
+}
+
+func run() {
+	log.Printf("RUN: %s\n", time.Now().Format(time.RFC850))
+
 	var db *sqlx.DB
 	var err error
 
