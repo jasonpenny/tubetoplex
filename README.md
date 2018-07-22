@@ -24,6 +24,17 @@ Install on MacOS with `brew install dep`
 
 Update dependencies with `dep ensure`
 
+## Running
+
+Copy `run.sh.sample` to `run.sh` and modify for your environment.
+
+Build a docker container `docker build -t tubetoplex .`
+
+Run in interactive mode to see logs as they happen.
+`--privileged` is used to allow mounting a windows shared folder from
+the network on a windows host.
+`docker run --rm --privileged -it tubetoplex`
+
 ### TODO
 
 - [X] Setup database to store videos

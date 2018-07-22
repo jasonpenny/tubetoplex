@@ -1,0 +1,13 @@
+#!/bin/sh
+
+mount -t cifs -o username=...,password=...,nobrl //Server/Folder /mnt
+
+export TUMBLR_CONSUMER_KEY='...'
+export TUMBLR_CONSUMER_SECRET='...'
+export TUMBLR_TOKEN='...'
+export TUMBLR_TOKEN_SECRET='...'
+
+cd '/mnt/...'
+
+# run any arguments to this script as-is
+exec "$@"
