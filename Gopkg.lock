@@ -3,52 +3,72 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:1d19f6b065cf5fc660bab922b883690df0bbf101cb00425a1eefddc61311c2eb"
   name = "github.com/BrianAllred/goydl"
   packages = ["."]
+  pruneopts = "UT"
   revision = "015c9f2f47fc398605b489e39d9720338e7b356d"
 
 [[projects]]
+  digest = "1:144f5984ed1f07aa8fa2468844f856b1ac8e93ac94e1fd19fbf69ce034d9ef92"
   name = "github.com/dghubble/oauth1"
   packages = ["."]
+  pruneopts = "UT"
   revision = "70562a5920ad9b6ff03ef697c0f90ae569abbd2b"
   version = "v0.4.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:b11e320ec3c6a28f696f2bdbb6a40a771340a6a94638ccce69d90f66f5f89de7"
   name = "github.com/jmoiron/sqlx"
   packages = [
     ".",
-    "reflectx"
+    "reflectx",
   ]
+  pruneopts = "UT"
   revision = "cf35089a197953c69420c8d0cecda90809764b1d"
 
 [[projects]]
+  digest = "1:ee0845ea64262e3d1a6e2eab768fcb2008a0c8e571b7a3bebea554a1c031aeeb"
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
+  pruneopts = "UT"
   revision = "6c771bb9887719704b210e87e934f08be014bdb1"
   version = "v1.6.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:f0c6bc02e53bcca1d32346d93e2e75dbb89001c20b13782c6a9bbb46e693dfde"
   name = "github.com/tumblr/tumblr.go"
   packages = ["."]
-  revision = "01c315a92daab3e8af9df49da1363cc60421fa70"
-  version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/tumblr/tumblrclient.go"
-  packages = ["."]
-  revision = "a17c0c6c5e1b7cf6a493cee47621034a11329358"
-  version = "v1.0.0"
+  pruneopts = "UT"
+  revision = "bee428571a20e31557d803e67569a80f76ea9d65"
 
 [[projects]]
   branch = "master"
+  digest = "1:ea161f280ba87dc87919de7853c4f93daf0d6f61a2522fb91aadc31edb4ffc4a"
+  name = "github.com/tumblr/tumblrclient.go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "70fe57924421ea2913ef9e72a11984f01c1bc352"
+
+[[projects]]
+  branch = "master"
+  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
   name = "golang.org/x/net"
   packages = ["context"]
+  pruneopts = "UT"
   revision = "22ae77b79946ea320088417e4d50825671d82d57"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c99ea66e3dc5e12d5d81d255d93b22e46475f0cd6316e0d074bd8df2bbe036df"
+  input-imports = [
+    "github.com/BrianAllred/goydl",
+    "github.com/jmoiron/sqlx",
+    "github.com/mattn/go-sqlite3",
+    "github.com/tumblr/tumblr.go",
+    "github.com/tumblr/tumblrclient.go",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
