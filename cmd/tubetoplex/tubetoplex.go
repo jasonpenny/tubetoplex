@@ -36,6 +36,7 @@ func run() {
 	videostorage.SetupTable(db)
 	showstorage.SetupTable(db)
 
+	pullNewFeeds(db)
 	pullNewTumblrPosts(db)
 	applyShowNumbersToNewPosts(db)
 	downloadNumberedVideos(db)

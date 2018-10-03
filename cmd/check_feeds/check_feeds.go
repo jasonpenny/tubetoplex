@@ -3,34 +3,11 @@ package main
 import (
 	"fmt"
 
+	"github.com/jasonpenny/tubetoplex/internal/feedstorage"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/mmcdole/gofeed"
 )
-
-type feed struct {
-	ID           int    `db:"id"`
-	Show         string `db:"show"`
-	URL          string `db:"url"`
-	LastItemDate string `db:"last_update"`
-}
-
-func setupFeedTable(db *sqlx.DB) {
-	db.MustExec(`
-	CREATE TABLE IF NOT EXISTS feeds (
-		id INTEGER PRIMARY KEY,
-		show VARCHAR,
-		url TEXT,
-		last_update VARCHAR
-	);
-	`)
-}
-
-func getFeeds(db *sqlx.DB) ([]feed, error) {
-	feeds := []feed{}
-	err := db.Select(&feeds, "SELECT * FROM feeds ORDER BY id")
-	return feeds, err
-}
 
 func main() {
 	var db *sqlx.DB
@@ -41,9 +18,9 @@ func main() {
 		panic("Could not open sqlite file")
 	}
 
-	setupFeedTable(db)
+	feedstorage.SetupFeedTable(db)
 
-	feeds, err := getFeeds(db)
+	feeds, err := feedstorage.GetAllFeeds(db)
 	if err != nil {
 		fmt.Println(err)
 		panic("Could not get list of feeds from DB")
@@ -58,7 +35,7 @@ func getFeedItemsSince(URL, lastDate string) {
 	feed, _ := fp.ParseURL(URL)
 	fmt.Println(feed.Title)
 	for _, item := range feed.Items {
-		if item.Published < lastDate {
+		if item.Published <= lastDate {
 			break
 		}
 		fmt.Println(" ", item.Published, item.Link)
