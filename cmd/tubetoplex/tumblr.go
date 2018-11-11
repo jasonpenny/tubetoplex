@@ -75,7 +75,14 @@ func pullNewTumblrPosts(db *sqlx.DB) {
 					// fallback to parsing out of source_url
 					if u, err := url.Parse(pt.SourceUrl); err == nil {
 						if m, err := url.ParseQuery(u.RawQuery); err == nil {
-							video.URL = m["z"][0]
+							if zURL, ok := m["z"]; ok {
+								video.URL = zURL[0]
+							} else {
+								log.Printf(
+									"Could not parse 'z' param from SourceUrl : %v",
+									u,
+								)
+							}
 						}
 					}
 				}
