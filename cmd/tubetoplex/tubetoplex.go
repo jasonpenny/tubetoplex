@@ -82,7 +82,14 @@ func downloadNumberedVideos(db *sqlx.DB) {
 
 	for _, video := range videos {
 		log.Printf("DOWNLOAD: Started downloading video %s", video.URL)
-		vi := youtubedl.DownloadURL(video.URL, video.SeasonNum, video.EpisodeNum)
+		vi, err := youtubedl.DownloadURL(video.URL, video.SeasonNum, video.EpisodeNum)
+		if err != nil {
+			log.Printf("DOWNLOAD: Failed to start download: %v\n", err)
+			if _, err := videostorage.Update(db, &video, "failed-download"); err != nil {
+				log.Printf("DOWNLOAD: Additionally, updating db failed to set as failed-download  %v\n", err)
+			}
+			continue
+		}
 
 		// store more details
 		video.Filename = vi.Filename
@@ -93,7 +100,7 @@ func downloadNumberedVideos(db *sqlx.DB) {
 
 		// transition to downloaded
 		if _, err := videostorage.Update(db, &video, "downloaded"); err != nil {
-			log.Printf("DOWNLOAD: download failed %v\n", err)
+			log.Printf("DOWNLOAD: Updating db failed to set as downloaded  %v\n", err)
 			continue
 		}
 

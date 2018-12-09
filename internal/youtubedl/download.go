@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"path/filepath"
 
 	"github.com/BrianAllred/goydl"
@@ -23,7 +22,7 @@ type VideoInfo struct {
 
 // DownloadURL will use youtube-dl to download a video and store it with the
 // filename with the prefix "S{season}E{episode}.{youtube-dl filaname}.
-func DownloadURL(url string, season, episode int) *VideoInfo {
+func DownloadURL(url string, season, episode int) (*VideoInfo, error) {
 	dir := randomDir()
 
 	youtubeDl := goydl.NewYoutubeDl()
@@ -37,7 +36,7 @@ func DownloadURL(url string, season, episode int) *VideoInfo {
 
 	cmd, err := youtubeDl.Download(url)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	// without this, the 2nd time it runs it stalls
@@ -54,7 +53,7 @@ func DownloadURL(url string, season, episode int) *VideoInfo {
 	}
 
 	if err = cmd.Wait(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	filepathglob := filepath.Join(
@@ -67,10 +66,10 @@ func DownloadURL(url string, season, episode int) *VideoInfo {
 
 	matches, err := filepath.Glob(filepathglob)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	result.Filename = matches[0]
 
-	return result
+	return result, nil
 }
