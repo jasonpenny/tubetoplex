@@ -13,9 +13,7 @@ RUN cd /go/src/github.com/jasonpenny/tubetoplex && \
 FROM alpine
 
 RUN apk update \
-    && apk add ca-certificates \
-    && apk add youtube-dl \
-    && apk add cifs-utils
+    && apk add --no-cache ca-certificates youtube-dl cifs-utils
 
 WORKDIR /app
 
