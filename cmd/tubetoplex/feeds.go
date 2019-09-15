@@ -14,7 +14,8 @@ func pullNewFeeds(db *sqlx.DB) {
 
 	feeds, err := feedstorage.GetAllFeeds(db)
 	if err != nil {
-		panic(err)
+		log.Printf("feedstorage.GetAllFeeds() failedr: %v\n", err)
+		return
 	}
 
 	for _, feed := range feeds {

@@ -31,14 +31,16 @@ func pullNewTumblrPosts(db *sqlx.DB) {
 
 		resp, err := tumblr.GetPosts(client, "softwaredevvideos", params)
 		if err != nil {
-			panic(err)
+			log.Printf("tumblr.GetPosts() failed: %v\n", err)
+			return
 		}
 
 		offset += 10
 
 		allPosts, err := resp.All()
 		if err != nil {
-			panic(err)
+			log.Printf("resp.All() failed: %v\n", err)
+			return
 		}
 
 		if len(allPosts) == 0 {
