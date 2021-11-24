@@ -9,8 +9,8 @@ RUN cd /app \
 FROM alpine:3.10
 
 RUN apk update \
-      && apk add --no-cache ca-certificates youtube-dl cifs-utils \
-      && pip3 install --upgrade youtube-dl
+      && apk add --no-cache ca-certificates youtube-dl cifs-utils ffmpeg \
+      && pip3 install --upgrade pip youtube-dl
 
 WORKDIR /app
 
