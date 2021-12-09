@@ -1,5 +1,7 @@
-github.com/BrianAllred/goydl v0.0.0-20171128220148-015c9f2f47fc h1:xuMCRW5RWNoM2gyLlugPiiALtxpgku1PHNxQDt7UJ/Y=
-github.com/BrianAllred/goydl v0.0.0-20171128220148-015c9f2f47fc/go.mod h1:hpSBK67Uduw/SGy6bObP8YrAZjcw0WR+gV/KTl9o2Lc=
+github.com/BrianAllred/goydl v0.0.0-20200922193158-6eeb623d0fe8 h1:jSnpkKA8r7Ow7YuLiHsXc0fPQzdHktFGnLUmGAl+owM=
+github.com/BrianAllred/goydl v0.0.0-20200922193158-6eeb623d0fe8/go.mod h1:hpSBK67Uduw/SGy6bObP8YrAZjcw0WR+gV/KTl9o2Lc=
+github.com/Dadard29/goydl v0.0.0-20210330123625-34405ff679b8 h1:s+a/KiC9X4XIH9uqmPvLM4oIoUAeXEZ2g+TdIeg0/I0=
+github.com/Dadard29/goydl v0.0.0-20210330123625-34405ff679b8/go.mod h1:rxeIRv1NT9TBK0LiKgvvzeNqN18q/m38c7115rnw5EE=
 github.com/PuerkitoBio/goquery v1.4.1 h1:smcIRGdYm/w7JSbcdeLHEMzxmsBQvl8lhf0dSw2nzMI=
 github.com/PuerkitoBio/goquery v1.4.1/go.mod h1:T9ezsOHcCrDCgA8aF1Cqr3sSYbO/xgdy8/R/XiIMAhA=
 github.com/andybalholm/cascadia v1.0.0 h1:hOCXnnZ5A+3eVDX8pvgl4kofXv2ELss0bKcqRySc45o=
