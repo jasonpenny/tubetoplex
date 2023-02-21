@@ -9,7 +9,7 @@ There are a lot of videos available for online streaming, but I want to
 watch these videos during my commute, where I don't have internet
 access.
 I save links to these videos I find on a tumblr blog at
-https://softwaredevvideos.tumblr.com/
+<https://softwaredevvideos.tumblr.com/>
 
 This tool will automatically find new videos on the blog that it has not
 processed yet, download them, move them to a directory of a Custom TV Show,
@@ -18,11 +18,12 @@ information about the "episode".
 
 ## Development
 
-Dependency management is handled by [dep](https://github.com/golang/dep)
+Update dependencies with:
 
-Install on MacOS with `brew install dep`
-
-Update dependencies with `dep ensure`
+```sh
+go get -u ./...
+go mod tidy
+```
 
 ## Running
 
