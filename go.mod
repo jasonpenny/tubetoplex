@@ -1,6 +1,6 @@
 module github.com/jasonpenny/tubetoplex
 
-go 1.19
+go 1.17
 
 require (
 	github.com/Dadard29/goydl v0.0.0-20210330123625-34405ff679b8
