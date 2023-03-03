@@ -26,6 +26,7 @@ func DownloadURL(url string, season, episode int) (*VideoInfo, error) {
 	dir := randomDir()
 
 	youtubeDl := goydl.NewYoutubeDl()
+	youtubeDl.YoutubeDlPath = "/usr/bin/yt-dlp"
 	youtubeDl.Options.Format.Value = "bestvideo[filesize<500M][height<=?720]+bestaudio/best"
 	youtubeDl.Options.Output.Value = filepath.Join(
 		dir,
