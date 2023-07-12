@@ -1,8 +1,6 @@
 github.com/BrianAllred/goydl v0.0.0-20200922193158-6eeb623d0fe8 h1:jSnpkKA8r7Ow7YuLiHsXc0fPQzdHktFGnLUmGAl+owM=
 github.com/BrianAllred/goydl v0.0.0-20200922193158-6eeb623d0fe8/go.mod h1:hpSBK67Uduw/SGy6bObP8YrAZjcw0WR+gV/KTl9o2Lc=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/Dadard29/goydl v0.0.0-20210330123625-34405ff679b8 h1:s+a/KiC9X4XIH9uqmPvLM4oIoUAeXEZ2g+TdIeg0/I0=
-github.com/Dadard29/goydl v0.0.0-20210330123625-34405ff679b8/go.mod h1:rxeIRv1NT9TBK0LiKgvvzeNqN18q/m38c7115rnw5EE=
 github.com/PuerkitoBio/goquery v1.8.0/go.mod h1:ypIiRMtY7COPGk+I/YbZLbxsxn9g5ejnI2HSMtkjZvI=
 github.com/PuerkitoBio/goquery v1.8.1 h1:uQxhNlArOIdbrH1tr0UXwdVFgDcZDrZVdcpygAcwmWM=
 github.com/PuerkitoBio/goquery v1.8.1/go.mod h1:Q8ICL1kNUJ2sXGoAhPGUdYDJvgQgHzJsnnd3H7Ho5jQ=
@@ -17,6 +15,8 @@ github.com/dghubble/oauth1 v0.7.2/go.mod h1:9erQdIhqhOHG/7K9s/tgh9Ks/AfoyrO5mW/4
 github.com/go-sql-driver/mysql v1.6.0 h1:BCTh4TKNUYmOmMUcQ3IipzF5prigylS7XXjEkfCHuOE=
 github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
+github.com/jasonpenny/goydl v0.0.0-20230712202240-3472bee55843 h1:YuuIJw772ODxSV0JybrSHo0exBVtDWFQYughdZuiizw=
+github.com/jasonpenny/goydl v0.0.0-20230712202240-3472bee55843/go.mod h1:LgQVso0i1Z9fmaueHqXWOo32Kxj/TUA/HqQe+G9cFbc=
 github.com/jmoiron/sqlx v1.3.5 h1:vFFPA71p1o5gAeqtEAwLU4dnX2napprKtHr7PYIcN3g=
 github.com/jmoiron/sqlx v1.3.5/go.mod h1:nRVWtLre0KfCLJvgxzCsLVMogSvQ1zNJtpYr2Ccp0mQ=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=

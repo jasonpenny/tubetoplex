@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/Dadard29/goydl"
+	"github.com/jasonpenny/goydl"
 )
 
 // VideoInfo represents a video file and its youtube-dl metadata.

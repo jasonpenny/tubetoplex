@@ -3,7 +3,7 @@ module github.com/jasonpenny/tubetoplex
 go 1.17
 
 require (
-	github.com/Dadard29/goydl v0.0.0-20210330123625-34405ff679b8
+	github.com/jasonpenny/goydl v0.0.0-20230712202240-3472bee55843
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/mmcdole/gofeed v1.2.0
