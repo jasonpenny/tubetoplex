@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine3.18 AS gobuild
+FROM golang:1.23-alpine3.20 AS gobuild
 
 COPY . /app
 
