@@ -1,8 +1,8 @@
 module github.com/jasonpenny/tubetoplex
 
-go 1.23
+go 1.23.0
 
-toolchain go1.23.4
+toolchain go1.24.1
 
 require (
 	github.com/jasonpenny/goydl v0.0.0-20230712202240-3472bee55843
@@ -22,6 +22,6 @@ require (
 	github.com/mmcdole/goxpp v1.1.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 )
